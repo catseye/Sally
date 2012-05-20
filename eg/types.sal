@@ -1,0 +1,15 @@
+stdlib
+int semaphore type
+semaphore signal semaphore as semaphore sub as int $1 1
+semaphore wait semaphore as semaphore add as int $1 1
+
+void dosemaphores int as int wait signal wait wait as semaphore 0
+
+int int coord type
+int int swap int int $2 $1
+int int mkcoord coord as coord $1 $2
+coord getxy int int as int int $1
+
+int int main int int int
+  getxy mkcoord $1 $2
+  dosemaphores

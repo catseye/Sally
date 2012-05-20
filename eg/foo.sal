@@ -1,0 +1,3 @@
+stdlib
+int main int char
+  sub dup $1 pop 4 'a'

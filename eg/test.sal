@@ -1,0 +1,7 @@
+stdlib
+int int binop int
+  proto
+int int like binop dobinop int
+  do 3 $1 $2
+int main int int
+  dobinop $1 5 the add dobinop $1 5 the sub

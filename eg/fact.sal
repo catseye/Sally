@@ -1,0 +1,3 @@
+stdlib
+int factorial int if $1 mul $1 factorial sub $1 1 1
+int main int factorial $1

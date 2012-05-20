@@ -1,0 +1,279 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html;CHARSET=iso-8859-1">
+    <meta name="Description" content="Cat's Eye Technologies: The Sally Programming Language">
+    <title>Cat's Eye Technologies: The Sally Programming Language</title>
+</head>
+<body  bgcolor="#ffffff" text="#000000" link="#1c3f7f"
+      vlink="#204020" background="/img/sinewhite.gif" >
+<h1>Sally</h1>
+<p>v2003.1104 <img src="/images/icons/copyright.gif"
+   align=absmiddle width=12 height=12 alt="(c)" border=0>2000-2004
+   <a href="http://catseye.webhop.net/">Cat's Eye Technologies</a>.
+
+<h2>What is Sally?</h2>
+
+<p>Sally is basically FORTH, except:
+
+<ul>
+<li> All functions are declared with fixed range and domain types;
+<li> Strong type checking is applied to arguments and results;
+<li> User-defined types can be introduced into the checking scheme;
+<li> Forward, instead of reverse, Polish notation is used.
+</ul>
+
+<p>Sally is also an exercise in the reduction of excise (redundant,
+extraneous, or sugary syntax).
+
+<p>For example, there is, unlike FORTH, no special symbol to indicate
+the end of a function definition.  (A new definition starts whenever
+the previous one ends.)
+
+<p>The ANSI C source code for the compiler is very small, less than
+16K in total.  The compiler translates Sally programs to ANSI C.
+
+<p>Just to be silly I've scattered exercises for the reader around the
+documentation.  I don't actually expect anyone to try any of them,
+but they kind of indicate what I'd like to see in a "Sally++" if
+there ever was such a beast.
+
+<h3>Syntax</h3>
+
+<p>A Sally program consists of a series of function declarations.
+Each declaration consists of the name and type of a new function
+followed by a series of function applications and primitives.
+
+<p>The domain types are listed before the function name, the range
+types, after.  For example, a function called <tt>foo</tt> which maps an
+integer and a character to an integer, would be notated as
+
+<pre>  int char foo int ...
+</pre>
+
+<p>The <tt>...</tt> represents the function applications which comprise the
+body of the function.
+
+<p>The syntax of each application is dictated by the types given in
+the function's definition.  For example, a correct syntax for
+applying the <tt>foo</tt> function above might be
+
+<pre>  foo 42 'X
+</pre>
+
+<p>(Note the lack of a need for parentheses.)  This application of
+foo would be appropriate anywhere a previous application requires
+an integer argument, or where a definition requires an integer
+result.
+
+<p>Functions can accept multiple arguments and return multiple results.
+A function which returns multiple results can pass those results as
+a 'chunk' to the previous function application.  For example, the
+following would return the double of the given argument <tt>$1</tt>:
+
+<pre>  add dup $1
+</pre>
+
+<p>And this would probably appear in a function definition like so:
+
+<pre>  int double int add dup $1
+</pre>
+
+<p>The type <tt>void</tt> indicates lack of any arguments or results.  When
+it indicates the lack of arguments, it must be specified explicitly
+(to indicate to the parser that the previous definition has ended.)
+When used to indicate the lack of results, it can be
+inferred by the fact that there are no types following the function
+name.
+
+<p>EXERCISE:  See if you can find a way to change the parser so that
+<tt>void</tt> is always implicit, even when it's used to indicate the
+lack of arguments to a function.  Be prepared to deal with a token
+which is an undeclared symbol in a mature way.
+
+<h3>Functions which Accept and Return Functions</h3>
+
+<p>A function can be passed to another function.  In order for a
+function to be defined which accepts a function passed to it, a
+prototype of the type of function to be passed must be defined.
+This prototype is then preceded in the type declaration by the
+<tt>like</tt> operator.
+
+<p>For example, say we want a function which accepts an integer
+and a function which maps an integer to another integer, and
+returns an integer.  To do this, first we establish the prototype
+function which is included in the arguments to the other function:
+
+<pre>  int map int proto
+</pre>
+
+<p>(This kind of definition, a "proto", also functions like a "forward"
+declaration in Pascal or an "extern" declaration in C.)
+
+<p>We then use the <tt>like</tt> operator in specifying the definition of the
+other function:
+
+<pre>  int like map other int ...
+</pre>
+
+<p>The function <tt>other</tt> now takes an integer and a function 'like map'
+(that is, a function which has the same domain and range types as
+the function called <tt>map</tt>, even if the body of <tt>map</tt> is not actually
+defined) and returns an integer.
+
+<p>Even so, how does an application pass a function to another function?
+You can't just name the function, because that indicates that you want
+to apply it and use the return value.  You must instead "reference" or
+"escape" the function by preceding it with <tt>the</tt>.  So to apply the
+<tt>other</tt> function above to a function such as <tt>negate</tt>, one would write
+
+<pre>  other 5 the negate
+</pre>
+
+<p>Assuming <tt>negate</tt> is declared with the same range and domain types as
+<tt>map</tt>, this should pass the function <tt>negate</tt> without trying to apply
+it (presumably leaving that up to the <tt>other</tt> function).
+
+<p>Speaking of which, there is one last issue to cover.  Once a function
+like <tt>other</tt> has a reference to a function like <tt>map</tt> passed to it,
+how does <tt>other</tt> use the passed function?
+
+<p>The answer is the <tt>do</tt> keyword.  <tt>do</tt> is followed by the number of
+an argument.  It is not unlike <tt>$1</tt>, but it does not simply evaluate to
+the argument, it actually calls it.  When this is the case, the
+argument better be a function (all that strong typing stuff applies.)
+
+<p>EXERCISE:  See if you can extend the <tt>the</tt> operator to provide
+lambda functions.  Use the following as a syntax guideline for how
+one would specify a lambda function:
+
+<pre>  other 5 the int -&gt; int + $1 7
+</pre>
+
+<p>Remember, there's no special "End Function Definition" symbol!
+
+<p>EXERCISE:  Extend <tt>do</tt> to handle <tt>the</tt> functions directly.  Example:
+
+<pre>  do the monkey
+</pre>
+
+<p>EXERCISE:  Finally, extend <tt>like</tt> to likewise handle <tt>the</tt> functions
+directly.  Example:
+
+<pre>  int like the int -&gt; int proto other int ...
+</pre>
+
+<h3>Type Checking and Casting</h3>
+
+<p>A named type can defined in Sally by defining it like you would define
+a function, but with no range type, and with no definition, instead the
+token <tt>type</tt>, as in:
+
+<pre>  int semaphore type
+</pre>
+
+<p>In Sally, two types are equivalent if:
+<ul>
+<li> Both are named and their names are the same; or
+<li> Neither is named and they are structurally equivalent.
+</ul>
+
+<p>(By named, I of course mean, named by the user, not intrinsic to the
+language.  Even though <tt>int</tt> is technically a name, it's unnamed for
+our purposes here.)
+
+<p>Values can be cast from one type to another.  This is invaluable for
+any structured data access in Sally.
+
+<p>No conversions are done during type casting.  Types can only be
+cast to other types of the same size (number of elements - you can
+cast <tt>char</tt> to <tt>int</tt> but not to <tt>int int</tt> or <tt>void</tt>.)
+
+<p>Typecasts are performed with the <tt>as</tt> operator, as in
+
+<pre>  as char 7
+</pre>
+
+<p>to represent a bell.
+
+<p>EXERCISE:  Implement type variables, so that one could define
+functions like
+
+<pre>  `1 `2 swap `2 `1 $2 $1
+</pre>
+
+<p>Which would be applicable no matter what types were passed to and
+received from <tt>swap</tt>, as long as the types were consistent (all
+<tt>`1</tt>'s are the same type and all <tt>`2</tt>'s are the same type for any
+given application of <tt>swap</tt>.)
+
+<p>There are several ways one may want to attempt this.  One is by
+using the process of <i>unification</i> to make sure all type variables
+are used consistently.  Adding this to Sally may be excessively
+tricky because of the way it does type checking.  With a stack of
+types, there may be a more efficient algorithm for replacing type
+variables with instances, and subsequently checking them for
+consistency.
+
+<h3>Libraries, Side Effects, and <tt>main</tt></h3>
+
+<p>Libraries can be included before the first function definition in a
+program.  There is no special "include" token, the library is simply
+named, and if a file named that (plus the extension <tt>.sal</tt>) is located,
+it is (virtually) inserted into that point in the program.
+
+<p>For example, many of the sample programs begin with the token
+<tt>stdlib</tt>.  This loads the file stdlib.sal into that point in the
+program, introducing a handful of function prototypes.
+
+<p>Libraries are also how Sally deals with side effects.  The philosophy
+is that if the programmer wants to disturb the purity of the functional
+paradigm by introducing side effects, they may do so, but they will be
+made clearly aware of the fact.
+
+<p>Having said that, Sally can only perform side effect communications
+by including the library called <tt>sidefxio</tt> - thus reminding the
+programmer that there are side effect communications at work in the
+following program.
+
+<p>Without including this library Sally is limited to batch
+communications.
+
+<p>In both schemes, the function called <tt>main</tt> is the function which is
+applied when the entire program is run.  <tt>main</tt> may have any number
+of arguments and any number of return values, although they may only
+be of <tt>int</tt> type.  For each argument, a value is required as a
+command-line argument when the program is run; for each result, the
+resultant value is displayed at the end of the program.
+
+<p>This little communications scheme is minimal, and limited, but it
+does not introduce any side effects in any way, and is capable of
+communicating any Turing-solvable problem, so it has some things
+going for it.  To get around the limitations, however, you have to
+resort to side effect I/O, where you can use the 'print' and
+'input' functions to report and obtain information from the user
+while the program is running.
+
+<p>EXERCISE:  Loosen the constraints on the type of the <tt>main</tt>
+function - allow arguments and return values of type <tt>char</tt>.
+
+<h3>EBNF Grammar</h3>
+
+<pre>  Program     ::= {Definition}.
+  Definition  ::= {Library} {Type} Name {Type}
+                  ("type" | "proto" | {Application}).
+  Type        ::= "int" | "char" | "like" Name | Name.
+  Application ::= Primitive
+                | "$" Number
+	        | (Name | "do" Number) {Instr}
+                | "as" {Type} Instr
+	        | "if" Instr Instr Instr
+                | "the" Name.
+  Primitive   ::= &lt;&lt;an integer notated in decimal like 123&gt;&gt;
+                | &lt;&lt;a character preceded by a single quote like 'A&gt;&gt;.
+</pre>
+
+<center><p><font size=-1>  
+Last Updated Sep 20&nbsp;<img src="/images/icons/copyright.gif"
+   align=absmiddle width=12 height=12 alt="(c)" border=0>2004 <a
+   href="http://catseye.webhop.net/">Cat's Eye Technologies</a>.
+</font></center>
+</body></html>

@@ -1,0 +1,7 @@
+int int add int proto
+int int sub int proto
+int int mul int proto
+int int div int proto
+    int dup int int proto
+    int pop proto
+

@@ -1,0 +1,13 @@
+Change Log for Sally
+--------------------
+
+2000.0226
+
+  Original release.
+  
+2003.1104
+
+  Added GNU Makefile.
+  Added bin/ and lib/ subdirectories.
+  Split sally.c into sally.c and runtime.c.
+  Added libsally library.
