@@ -1,12 +1,14 @@
 # GNU Makefile for sally
 # Created 2003.1104 Chris Pressey, Cat's Eye Technologies
 
-# CC=gcc
+LIB=../lib/libsally.a
+PROG=../bin/sally2c
+CC?=gcc
 CFLAGS=-ansi -pedantic -g -Wall -O
 
 OBJECTS= sally.o sally2c.o
 
-all: ../lib/libsally.a ../bin/sally2c
+all: $(LIB) $(PROG)
 
 sally.o: sally.c sally.h
 
@@ -14,15 +16,13 @@ sally2c.o: sally2c.c sally.h
 
 runtime.o: runtime.c
 
-../lib/libsally.a: runtime.o
-	ar rc ../lib/libsally.a runtime.o
-	ranlib ../lib/libsally.a
+$(LIB): runtime.o
+	ar rc $(LIB) runtime.o
+	ranlib $(LIB)
 
 ../bin/sally2c: $(OBJECTS)
-	$(CC) -o../bin/sally2c $(OBJECTS)
-	strip ../bin/sally2c
+	$(CC) $(OBJECTS) -o $(PROG)
+	strip $(PROG)
 
 clean:
-	rm *.o
-	rm ../bin/*
-	rm ../lib/*
+	rm -f *.o $(PROG) $(LIB)
