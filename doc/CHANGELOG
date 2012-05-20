@@ -11,3 +11,8 @@ Change Log for Sally
   Added bin/ and lib/ subdirectories.
   Split sally.c into sally.c and runtime.c.
   Added libsally library.
+
+2010.0428
+
+  Made compilable with -ansi -pedantic.
+  Made documentation conform to XHTML 1.0 Strict.

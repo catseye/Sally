@@ -143,7 +143,6 @@ symbol * head = NULL;
 /* assumed: preceding call to sym_lookup failed. */
 symbol * sym_defn(char * s, type * t)
 {
-  symbol * h = head;
   symbol * n = (symbol *)malloc(sizeof(symbol));
   if (n == NULL)
   {
@@ -228,9 +227,9 @@ void scan(void)
     token[i] = 0;
     return;
   } else
-  if (!isspace(x) && !feof(infile))
+  if (!isspace((int)x) && !feof(infile))
   {
-    while (!isspace(x) && !feof(infile))
+    while (!isspace((int)x) && !feof(infile))
     {
       token[i++] = x;
       x = (char)getc(infile); column++;
@@ -251,7 +250,6 @@ void scan(void)
 type * application(type * func, type * avail)
 {
   type * args = NULL;
-  type * q = NULL;
   int i;
 
   while(count_type(args) < count_type(domain_type(func))
@@ -294,7 +292,6 @@ type * instruction(type * avail)
   } else
   if (tokeq("as"))
   {
-    type * m = NULL;
     int i = 0;
     scan();
     while(isatype())
@@ -330,7 +327,7 @@ type * instruction(type * avail)
     mytype = b;
     credit_type(mytype);
   } else
-  if (isdigit(token[0]))
+  if (isdigit((int)token[0]))
   {
     int litnum = atoi(token);
     fprintf(outfile, "  push(%d);\n", litnum);
@@ -476,13 +473,13 @@ void definition(void)
       if(s != NULL)
       {
 	int i = 0, j = 0;
-	int main = 0;
+	int is_main = 0;
 	int inputs = count_type(t);
 	type * v = NULL;
 
 	if(!strcmp(name, "main"))
 	{
-	  main = 1;
+	  is_main = 1;
 	  fprintf(outfile, "int main(int argc, char ** argv)\n{\n");
 	  for(i=1; i <= inputs; i++)
 	    fprintf(outfile, "  int arg%d = atoi(argv[%d]);\n", i, i);
@@ -519,7 +516,7 @@ void definition(void)
 	    error("Type mismatch");
         if(tsp != 0) error("Type mismatch");
 
-        if(main)
+        if(is_main)
         {
 	  fprintf(outfile, "  {\n");
 	  for(i=count_type(range_type(s->t)); i >= 1; i--)
