@@ -1,0 +1,9 @@
+syntax: glob
+
+*.o
+*.a
+
+syntax: regexp
+
+^bin
+^lib
