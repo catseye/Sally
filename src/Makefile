@@ -28,7 +28,7 @@ $(LIB): $(LIBDIR) runtime.o
 	ar rc $(LIB) runtime.o
 	ranlib $(LIB)
 
-$(PROG): $(OBJECTS)
+$(PROG): $(BINDIR) $(OBJECTS)
 	$(CC) $(OBJECTS) -o $(PROG)
 	strip $(PROG)
 
