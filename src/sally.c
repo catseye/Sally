@@ -306,22 +306,21 @@ type * instruction(type * avail)
   } else
   if (tokeq("if"))
   {
-    type * a = NULL;
     type * b = NULL;
-    type * c = NULL; type * d = NULL;
+    type * c = NULL;
     scan();
 
-    a = instruction(avail);
+    (void)instruction(avail);
     fprintf(outfile, "  if(pop() != 0) {\n");
-    d = debit_type();
+    (void)debit_type();
 
     b = instruction(avail);
     fprintf(outfile, "  } else {\n");
-    d = debit_type();
+    (void)debit_type();
 
     c = instruction(avail);
     fprintf(outfile, "  }\n");
-    d = debit_type();
+    (void)debit_type();
 
     if (!equivalent_types(b, c)) error("Need equivalent types in 'if'");
     mytype = b;
